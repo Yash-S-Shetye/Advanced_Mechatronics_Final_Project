@@ -111,3 +111,35 @@ bool Robot::linefollowing(){
     drive('s');return false;
   }
 }
+
+void Robot::test(){
+  servoLeft.write(1500);servoRight.write(1500);
+}
+
+//create robot object
+Robot rob;
+
+void setup() {
+  //initialize objects of Robot class and calling all the functions using the created object
+  Serial.begin(9600);
+  rob.INIT();
+}
+
+void loop() {
+  if(!finish){  //gloabal check flag, will set to be true when finish parking
+
+    //1st step: follow the line and enter the intersection
+    localfinish=false;
+    while(!localfinish){
+      if(!rob.linefollowing()){     //if meet intersection
+        rob.drive('f');delay(500); 
+        rob.drive('s');delay(1000); //turn right
+        c_intersection++; //record  the intersections have been passed
+        localfinish=true;
+      }
+    }
+
+    // Send message to rpi to do tag detection
+    // Get message fro rpi and take turn accordingly
+  }
+}

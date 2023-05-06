@@ -34,6 +34,7 @@ contours = [c for c in contours if cv2.contourArea(c) > 100]
 triangle = None
 for cnt in contours:
     triangle = cv2.approxPolyDP(cnt, 0.01 * cv2.arcLength(cnt, True), True)
+    print(triangle[0][0],triangle[1][0],triangle[2][0])
     if len(triangle) == 3:
         image = cv2.drawContours(image, [cnt], 0, (0, 255, 0), 3)
 
@@ -43,9 +44,10 @@ for cnt in contours:
             x = int(M['m10'] / M['m00'])
             y = int(M['m01'] / M['m00'])
             count_left = 0
+            print(x,y)
             for c in triangle:
-                count_left += 1 if c[0] < x else 0
-            if count_left > 1.5:
+                count_left += 1 if c[0][0] < x else 0
+            if count_left < 1.5:
                 print('Left')
             else:
                 print('Right')

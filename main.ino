@@ -13,6 +13,7 @@ int parkinglot[8]={0,0,0,0,0,0,0,0};
 int parkidx=0;
 int obstacles_no=0;
 int c_tw=0;
+int received;
 
 //Creating a robot class containing all the functions will be used
 class Robot {
@@ -30,7 +31,7 @@ class Robot {
   
   public:
   void INIT();
-  SoftwareSerial mySerial = SoftwareSerial(255, TxPin);
+  //SoftwareSerial mySerial = SoftwareSerial(255, TxPin);
   //Declaring all the required functions
   bool isobstacle();
   void drive(char i);
@@ -43,13 +44,13 @@ class Robot {
 void Robot::INIT(){
   servoLeft.attach(leftwheel);
   servoRight.attach(rightwheel);
-  mySerial.begin(9600);
+  //mySerial.begin(9600);
   delay(100);
-  mySerial.write(12); // Clear
-  mySerial.write(17); // Turn backlight on
+  //mySerial.write(12); // Clear
+  //mySerial.write(17); // Turn backlight on
   delay(5); // Required delay
-  mySerial.print("Initialized!!!");delay(2000);
-  pinMode(led,OUTPUT);
+  //mySerial.print("Initialized!!!");delay(2000);
+  Serial.begin(9600);
 }
 
 //Defining getDistance function
@@ -139,7 +140,27 @@ void loop() {
       }
     }
 
-    // Send message to rpi to do tag detection
-    // Get message fro rpi and take turn accordingly
-  }
+    // Detect triangles
+    localfinish=false;
+    while(!localfinish) {
+      // Send message to rpi to do tag detection
+      Serial.println(1);
+      // Get message from rpi and take turn accordingly
+      received = Serial.read();
+      if(received == 'l') {
+        rob.drive('l');delay(1000);
+        localfinish=true;
+      }
+      else if(received == 'r') {
+        rob.drive('r');delay(1000);
+        localfinish=true;
+      }
+      else {
+        rob.drive('s');
+      }
+    }
+
+    // Detect aruco tags
+    localfinish=false;
+    
 }

@@ -2,9 +2,10 @@
 #include <SoftwareSerial.h>
 #define black 1
 #define white 0
-#define obsdistance 20
+#define obsdistance 10
 #define nighty 1000
 #define oneeighty 2000
+const int led = 9;
 
 bool finish=false;                      //flag variable inidicates if the job is done
 bool localfinish=false;
@@ -22,12 +23,12 @@ class Robot {
   const int IR_MR=8;
   const int trig=6;
   const int echo=7;
-  Servo servoLeft, servoRight;
   SoftwareSerial mySerial = SoftwareSerial(255, TxPin);
   
   
   public:
   //Declaring all the required functions
+  Servo servoLeft, servoRight;
   void INIT();
   bool isobjectl();
   bool isobjectr();
@@ -45,10 +46,11 @@ void Robot::INIT(){
   servoRight.attach(rightwheel);
   mySerial.begin(9600);
   delay(100);
-  mySerial.write(12);       // Clear
-  mySerial.write(17);       // Turn backlight on
-  delay(5);                 // Required delay
-  mySerial.print("Initialized!!!");delay(2000);
+  mySerial.write(12); // Clear
+  mySerial.write(17); // Turn backlight on
+  delay(5); // Required delay
+  mySerial.print("Initialized!!!");delay(2000);mySerial.write(12);
+  pinMode(led,OUTPUT);
 }
 
 //Defining getDistance function
@@ -66,14 +68,9 @@ bool Robot::isobjectl() {
   duration = pulseIn(ultrasonic, HIGH);   // measure the duration of the sound wave travel
   distance = duration * 0.034 / 2;        // calculate the distance in cm
   
-  
   if (distance<obsdistance){
-    // blink the led if obstacle is detected
-    // digitalWrite(led,HIGH);delay(50);
-    // digitalWrite(led,LOW);delay(50);
     return true;}
   else{
-    //digitalWrite(led,LOW);delay(10);
     return false;}
 }
 
@@ -81,24 +78,20 @@ bool Robot::isobjectr() {
   long duration;
   int distance;
   pinMode(trig,OUTPUT);
+  pinMode(echo,INPUT);
   digitalWrite(trig, LOW);    // set the pin to low
   delayMicroseconds(2);             // wait for 2 microseconds
   digitalWrite(trig, HIGH);   // set the pin to high to trigger the sensor
   delayMicroseconds(10);            // wait for 10 microseconds
   digitalWrite(trig, LOW);    // set the pin to low again to switch to echo mode
 
-  pinMode(echo,INPUT);
   duration = pulseIn(echo, HIGH);   // measure the duration of the sound wave travel
   distance = duration * 0.034 / 2;        // calculate the distance in cm
   
   
   if (distance<obsdistance){
-    // blink the led if obstacle is detected
-    // digitalWrite(led,HIGH);delay(50);
-    // digitalWrite(led,LOW);delay(50);
     return true;}
   else{
-    //digitalWrite(led,LOW);delay(10);
     return false;}
 }
 
@@ -156,11 +149,11 @@ void Robot::lcd_display(char disp) {
   delay(5); // Required delay
   
   switch(disp) {
-    case 'i': mySerial.print("Intersection");mySerial.write(13);mySerial.print("Detected");delay(500);mySerial.write(12);break;           // i - Intersection detected
-    case 'p': mySerial.print("Parked");mySerial.write(13);mySerial.print("Successfully !!");delay(3000);mySerial.write(12);break;         // p - parked successfully
-    // case 's': mySerial.print("Occupied Spaces");mySerial.write(13);mySerial.print(obstacles_no);delay(3000);mySerial.write(12);break;     // s - Number of occupied spaces
-    // case 'f': mySerial.print("Four Wheelers");mySerial.write(13);mySerial.print(obstacles_no-c_tw);delay(3000);mySerial.write(12);break;  // f - Number of occupied spaces
-    // case 't': mySerial.print("Two Wheelers");mySerial.write(13);mySerial.print(c_tw);delay(3000);mySerial.write(12);break;                // s - Number of occupied spaces
+    case 'n': mySerial.print("Not Defective");mySerial.write(12);break;           // n - Non defective widget detected
+    case 'd': mySerial.print("Defective");mySerial.write(12);break;         // d - Defective widget detected
+    case 'e': mySerial.print("Not Defective");mySerial.write(13);mySerial.print(c_good); // print total number of non defective widgets
+              mySerial.write(12);mySerial.write("Defective");mySerial.write(13);mySerial.print(c_bad); // print total number of defective widgets
+              mySerial.write(12);break;
     default:Serial.println("Unclear command for display");break;
   }
 }
@@ -182,20 +175,24 @@ void setup() {
 void loop() {
   if(!finish){
     rob.drive('s');delay(1000);
-    unsigned long start,end;
-    char direction='l';   // or 'r'
-    char good='t';        // or 'f'
+    unsigned long start_time,end_time;
+    char direction=' ';   // or 'r'
+    char good=' ';        // or 'f'
     for(int corner=1;corner<=3;corner++){
       while(rob.linefollowing()){}
       rob.drive('s');
+      digitalWrite(led, HIGH);
+      delay(500);
+      digitalWrite(led, LOW);
+      delay(500);
 
-      // send signal to rpi, check triangle, then move on
-      Serial.print("d")
+      // send_time signal to rpi, check triangle, then move on
+      Serial.print('t');
       while(true){
         if(Serial.available()){
-          direction=Serial.read()
+          direction=Serial.read();
+          if(direction=='l'||direction=='r')break;
         }
-        if(direction=='l'||direction=='r')break;
       }
 
       if(direction=='l'){                     //triangle point to the left
@@ -205,21 +202,24 @@ void loop() {
         while(rob.linefollowing()){
           if(rob.isobjectl()){
             rob.drive('l');delay(nighty);
+            rob.drive('b');delay(500);
             rob.drive('s');
-            // Serial.print("a");
-            // start=millis();
-            // while(true){
-            //   end=millis();
-            //   if(end-start>2000)break;
-            //   if(Serial.available()){
-            //     good=Serial.read()
-            //   }
-            //   if(good=='t')c_good++;
-            //   if(good=='f')c_bad++;
-            // }
+             Serial.print('a');
+             start_time=millis();
+             while(true){
+               end_time=millis();
+               if(end_time-start_time>2000)break;
+               if(Serial.available()){
+                 good=Serial.read();
+                 if(good=='t'){rob.lcd_display('n');c_good++;}
+                 if(good=='f'){rob.lcd_display('d');c_bad++;}
+               }
+               
+             }
             break;
           }
         }
+        rob.drive('f');delay(500);
         rob.drive('l');delay(nighty);
         rob.goforaleftturn();
         while(rob.linefollowing()){}
@@ -228,22 +228,24 @@ void loop() {
         while(rob.linefollowing()){
           if(rob.isobjectr()){
             rob.drive('r');delay(nighty);
+            rob.drive('b');delay(500);
             rob.drive('s');
-            Serial.print("a");
-            // start=millis();
-            // while(true){
-            //   end=millis();
-            //   if(end-start>2000)break;
-            //   if(Serial.available()){
-            //     good=Serial.read()
-            //   }
-            //   if(good=='t')c_good++;
-            //   if(good=='f')c_bad++;
-            // }
+            Serial.print('a');
+             start_time=millis();
+             while(true){
+               end_time=millis();
+               if(end_time-start_time>2000)break;
+               if(Serial.available()){
+                 good=Serial.read();
+                 if(good=='n'){rob.lcd_display('n');c_good++;}
+                 if(good=='d'){rob.lcd_display('d');c_bad++;}
+               }
+               
+             }
             break;
           }
         }
-        rob.drive('l');delay(nighty);
+        rob.drive('f');delay(500);rob.drive('l');delay(nighty);
         rob.goforaleftturn();
         rob.goforarightturn();
       }
@@ -253,22 +255,25 @@ void loop() {
         rob.goforaleftturn();
         while(rob.linefollowing()){
           if(rob.isobjectr()){
+            rob.lcd_display('n');
             rob.drive('r');delay(nighty);
+            rob.drive('b');delay(500);
             rob.drive('s');
-            Serial.print("a");
-            // start=millis();
-            // while(true){
-            //   end=millis();
-            //   if(end-start>2000)break;
-            //   if(Serial.available()){
-            //     good=Serial.read()
-            //   }
-            //   if(good=='t')c_good++;
-            //   if(good=='f')c_bad++;
-            // }
+            Serial.print('a');
+             start_time=millis();
+             while(true){
+               end_time=millis();
+               if(end_time-start_time>2000)break;
+               if(Serial.available()){
+                 good=Serial.read();
+                 if(good=='n'){rob.lcd_display('n');c_good++;}
+                 if(good=='d'){rob.lcd_display('d');c_bad++;}
+               }
+             }
             break;
           }
         }
+        rob.drive('f');delay(500);
         rob.drive('r');delay(nighty);
         rob.goforarightturn();
         while(rob.linefollowing()){}
@@ -277,59 +282,70 @@ void loop() {
         while(rob.linefollowing()){
           if(rob.isobjectl()){
             rob.drive('l');delay(nighty);
+            rob.drive('b');delay(500);
             rob.drive('s');
-            Serial.print("a");
-            // start=millis();
-            // while(true){
-            //   end=millis();
-            //   if(end-start>2000)break;
-            //   if(Serial.available()){
-            //     good=Serial.read()
-            //   }
-            //   if(good=='t')c_good++;
-            //   if(good=='f')c_bad++;
-            // }
+            Serial.print('a');
+             start_time=millis();
+             while(true){
+               end_time=millis();
+               if(end_time-start_time>2000)break;
+               if(Serial.available()){
+                 good=Serial.read();
+                 if(good=='n'){rob.lcd_display('n');c_good++;}
+                 if(good=='d'){rob.lcd_display('d');c_bad++;}
+               }
+               
+             }
             break;
           }
         }
+        rob.drive('f');delay(500);
         rob.drive('r');delay(nighty);
         rob.goforarightturn();
         rob.goforaleftturn();
       }
     }
 
-    // to the end
-    char dir='l';
-    char flag='t';
-    start=millis();
-    end=millis();
-    while(end-start<3000)rob.linefollowing();
-    // Serial.print("d");
-    // while(true){
-    //   if(Serial.available())char dir=Serial.read();
-    //   if(dir=='l'||dir=='r'){
-    //     Serial.print("end");
-    //     break;
-    //     }
-    // }
+    // to the end_time
+    char dir=' ';
+    char flag=' ';
+    start_time=millis();
+    end_time=millis();
+    while(end_time-start_time<3000){
+      rob.linefollowing();
+      end_time=millis();
+    }
+    rob.drive('s');
+     Serial.print('t');
+     while(true){
+       if(Serial.available()){
+        dir=Serial.read();
+        if(dir=='l'||dir=='r'){
+         break;
+         }
+       }
+       
+     }
     
-    Serial.print("l");
+    Serial.print('f');
     if(dir=='r'){
       while(true){
-        rob.drive('r');
+        rob.servoLeft.write(1510);rob.servoRight.write(1510);delay(20);
         if(Serial.available()){flag=Serial.read();}
-        if(flag=='t')break;
+        if(flag=='g')break;
       }
     }
     else{
       while(true){
         rob.drive('l');
+        rob.servoLeft.write(1495);rob.servoRight.write(1495);delay(20);
         if(Serial.available()){flag=Serial.read();}
-        if(flag=='t')break;
+        if(flag=='g')break;
       }
     }
     rob.drive('f');delay(3000);
     rob.drive('s');delay(100);
+    rob.lcd_display('e');
     finish=true;
   }
 }

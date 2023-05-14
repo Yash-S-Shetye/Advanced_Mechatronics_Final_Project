@@ -214,7 +214,7 @@ void loop() {
                  if(good=='t'){rob.lcd_display('n');c_good++;}
                  if(good=='f'){rob.lcd_display('d');c_bad++;}
                }
-               rob.lcd_display('e');delay(2000)
+               
              }
             break;
           }
@@ -237,10 +237,10 @@ void loop() {
                if(end_time-start_time>2000)break;
                if(Serial.available()){
                  good=Serial.read();
-                 if(good=='n'){c_good++;}
-                 if(good=='d'){c_bad++;}
+                 if(good=='n'){rob.lcd_display('n');c_good++;}
+                 if(good=='d'){rob.lcd_display('d');c_bad++;}
                }
-               rob.lcd_display('e');delay(2000)
+               
              }
             break;
           }
@@ -266,10 +266,9 @@ void loop() {
                if(end_time-start_time>2000)break;
                if(Serial.available()){
                  good=Serial.read();
-                 if(good=='n'){c_good++;}
-                 if(good=='d'){c_bad++;}
+                 if(good=='n'){rob.lcd_display('n');c_good++;}
+                 if(good=='d'){rob.lcd_display('d');c_bad++;}
                }
-               rob.lcd_display('e');delay(2000)
              }
             break;
           }
@@ -292,10 +291,10 @@ void loop() {
                if(end_time-start_time>2000)break;
                if(Serial.available()){
                  good=Serial.read();
-                 if(good=='n'){c_good++;}
-                 if(good=='d'){c_bad++;}
+                 if(good=='n'){rob.lcd_display('n');c_good++;}
+                 if(good=='d'){rob.lcd_display('d');c_bad++;}
                }
-               rob.lcd_display('e');delay(2000)
+               
              }
             break;
           }

@@ -200,7 +200,7 @@ void loop() {
         rob.drive('l');delay(nighty);
         rob.goforarightturn();
         while(rob.linefollowing()){
-          if(rob.isobjectl()){
+          if(rob.isobjectl()){                //found artuco tag block
             rob.drive('l');delay(nighty);
             rob.drive('b');delay(500);
             rob.drive('s');
@@ -211,7 +211,7 @@ void loop() {
                if(end_time-start_time>2000)break;
                if(Serial.available()){
                  good=Serial.read();
-                 if(good=='n'){c_good++;rob.lcd_display('n');}
+                 if(good=='n'){c_good++;rob.lcd_display('n');}    // receiving message from rpi
                  if(good=='d'){c_bad++;rob.lcd_display('d');}
                }
                
@@ -219,14 +219,14 @@ void loop() {
             break;
           }
         }
-        rob.drive('f');delay(500);
+        rob.drive('f');delay(500);            //go to the other side
         rob.drive('l');delay(nighty);
         rob.goforaleftturn();
         while(rob.linefollowing()){}
         rob.drive('f');delay(500);
         rob.goforaleftturn();
         while(rob.linefollowing()){
-          if(rob.isobjectr()){
+          if(rob.isobjectr()){                                  // receiving message from rpi
             rob.drive('r');delay(nighty);
             rob.drive('b');delay(500);
             rob.drive('s');
@@ -318,7 +318,7 @@ void loop() {
       }
     }
 
-    // to the end
+    // to the end - no man's land
     char dir=' ';
     char flag=' ';
     start_time=millis();
@@ -330,7 +330,7 @@ void loop() {
     rob.drive('s');
      Serial.print('t');
      while(true){
-       if(Serial.available()){
+       if(Serial.available()){            // check direction
         dir=Serial.read();
         if(dir=='l'||dir=='r'){
          break;
@@ -343,7 +343,7 @@ void loop() {
     if(dir=='r'){
       while(true){
         rob.servoLeft.write(1510);rob.servoRight.write(1510);delay(20);
-        if(Serial.available()){flag=Serial.read();}
+        if(Serial.available()){flag=Serial.read();}                           // receiving signal from rpi
         if(flag=='g')break;
       }
     }
@@ -351,13 +351,13 @@ void loop() {
       while(true){
         rob.drive('l');
         rob.servoLeft.write(1495);rob.servoRight.write(1495);delay(20);
-        if(Serial.available()){flag=Serial.read();}
+        if(Serial.available()){flag=Serial.read();}                           // receiving signal from rpi
         if(flag=='g')break;
       }
     }
     rob.drive('f');delay(3000);
     rob.drive('s');delay(100);
-    rob.lcd_display('e');
+    rob.lcd_display('e');                                                     // display the counting and end
     finish=true;
   }
 }

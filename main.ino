@@ -149,10 +149,10 @@ void Robot::lcd_display(char disp) {
   delay(5); // Required delay
   
   switch(disp) {
-    case 'n': mySerial.print("Not Defective");mySerial.write(12);break;           // n - Non defective widget detected
-    case 'd': mySerial.print("Defective");mySerial.write(12);break;         // d - Defective widget detected
-    case 'e': mySerial.print("Not Defective");mySerial.write(13);mySerial.print(c_good); // print total number of non defective widgets
-              mySerial.write(12);mySerial.write("Defective");mySerial.write(13);mySerial.print(c_bad); // print total number of defective widgets
+    case 'n': mySerial.print("Not Defective");delay(2000);mySerial.write(12);break;           // n - Non defective widget detected
+    case 'd': mySerial.print("Defective");delay(2000);mySerial.write(12);break;         // d - Defective widget detected
+    case 'e': mySerial.print("Not Defective");delay(2000);mySerial.write(13);mySerial.print(c_good); // print total number of non defective widgets
+              mySerial.write(12);mySerial.write("Defective");delay(2000);mySerial.write(13);mySerial.print(c_bad); // print total number of defective widgets
               mySerial.write(12);break;
     default:Serial.println("Unclear command for display");break;
   }
@@ -211,8 +211,8 @@ void loop() {
                if(end_time-start_time>2000)break;
                if(Serial.available()){
                  good=Serial.read();
-                 if(good=='t'){rob.lcd_display('n');c_good++;}
-                 if(good=='f'){rob.lcd_display('d');c_bad++;}
+                 if(good=='n'){c_good++;rob.lcd_display('n');}
+                 if(good=='d'){c_bad++;rob.lcd_display('d');}
                }
                
              }
@@ -223,6 +223,10 @@ void loop() {
         rob.drive('l');delay(nighty);
         rob.goforaleftturn();
         while(rob.linefollowing()){}
+        digitalWrite(led, HIGH);
+        delay(500);
+        digitalWrite(led, LOW);
+        delay(500);
         rob.drive('f');delay(500);
         rob.goforaleftturn();
         while(rob.linefollowing()){
@@ -237,8 +241,8 @@ void loop() {
                if(end_time-start_time>2000)break;
                if(Serial.available()){
                  good=Serial.read();
-                 if(good=='n'){rob.lcd_display('n');c_good++;}
-                 if(good=='d'){rob.lcd_display('d');c_bad++;}
+                 if(good=='n'){c_good++;rob.lcd_display('n');}
+                 if(good=='d'){c_bad++;rob.lcd_display('d');}
                }
                
              }
@@ -266,8 +270,8 @@ void loop() {
                if(end_time-start_time>2000)break;
                if(Serial.available()){
                  good=Serial.read();
-                 if(good=='n'){rob.lcd_display('n');c_good++;}
-                 if(good=='d'){rob.lcd_display('d');c_bad++;}
+                 if(good=='n'){c_good++;rob.lcd_display('n');}
+                 if(good=='d'){c_bad++;rob.lcd_display('d');}
                }
              }
             break;
@@ -277,6 +281,10 @@ void loop() {
         rob.drive('r');delay(nighty);
         rob.goforarightturn();
         while(rob.linefollowing()){}
+        digitalWrite(led, HIGH);
+        delay(500);
+        digitalWrite(led, LOW);
+        delay(500);
         rob.drive('f');delay(500);
         rob.goforarightturn();
         while(rob.linefollowing()){
@@ -291,8 +299,8 @@ void loop() {
                if(end_time-start_time>2000)break;
                if(Serial.available()){
                  good=Serial.read();
-                 if(good=='n'){rob.lcd_display('n');c_good++;}
-                 if(good=='d'){rob.lcd_display('d');c_bad++;}
+                 if(good=='n'){c_good++;rob.lcd_display('n');}
+                 if(good=='d'){c_bad++;rob.lcd_display('d');}
                }
                
              }

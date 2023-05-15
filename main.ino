@@ -151,8 +151,8 @@ void Robot::lcd_display(char disp) {
   switch(disp) {
     case 'n': mySerial.print("Not Defective");delay(2000);mySerial.write(12);break;           // n - Non defective widget detected
     case 'd': mySerial.print("Defective");delay(2000);mySerial.write(12);break;         // d - Defective widget detected
-    case 'e': mySerial.print("Not Defective");delay(2000);mySerial.write(13);mySerial.print(c_good); // print total number of non defective widgets
-              mySerial.write(12);mySerial.write("Defective");delay(2000);mySerial.write(13);mySerial.print(c_bad); // print total number of defective widgets
+    case 'e': mySerial.print("Not Defective");mySerial.write(13);mySerial.print(c_good);delay(2000); // print total number of non defective widgets
+              mySerial.write(12);mySerial.write("Defective");mySerial.write(13);mySerial.print(c_bad);delay(2000);// print total number of defective widgets
               mySerial.write(12);break;
     default:Serial.println("Unclear command for display");break;
   }
@@ -223,10 +223,6 @@ void loop() {
         rob.drive('l');delay(nighty);
         rob.goforaleftturn();
         while(rob.linefollowing()){}
-        digitalWrite(led, HIGH);
-        delay(500);
-        digitalWrite(led, LOW);
-        delay(500);
         rob.drive('f');delay(500);
         rob.goforaleftturn();
         while(rob.linefollowing()){
@@ -287,10 +283,6 @@ void loop() {
         rob.drive('r');delay(nighty);
         rob.goforarightturn();
         while(rob.linefollowing()){}
-        digitalWrite(led, HIGH);
-        delay(500);
-        digitalWrite(led, LOW);
-        delay(500);
         rob.drive('f');delay(500);
         rob.goforarightturn();
         while(rob.linefollowing()){

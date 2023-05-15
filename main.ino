@@ -251,7 +251,13 @@ void loop() {
         }
         rob.drive('f');delay(500);rob.drive('l');delay(nighty);
         rob.goforaleftturn();
-        rob.goforarightturn();
+        while(rob.linefollowing()){}
+        rob.drive('r');
+        digitalWrite(led, HIGH);
+        delay(500);
+        digitalWrite(led, LOW);
+        delay(500);
+        rob.drive('s');
       }
       else{                                 //triangle point to the right
         rob.drive('f');delay(500);
@@ -310,11 +316,17 @@ void loop() {
         rob.drive('f');delay(500);
         rob.drive('r');delay(nighty);
         rob.goforarightturn();
-        rob.goforaleftturn();
+        while(rob.linefollowing()){}
+        rob.drive('l');
+        digitalWrite(led, HIGH);
+        delay(500);
+        digitalWrite(led, LOW);
+        delay(500);
+        rob.drive('s');
       }
     }
 
-    // to the end_time
+    // to the end
     char dir=' ';
     char flag=' ';
     start_time=millis();

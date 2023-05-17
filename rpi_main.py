@@ -39,47 +39,6 @@ def detect_triangles(img):
     # Perform morphological operations
     kernel = np.ones((5, 5), np.uint8)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    #! /usr/bin/env python
-
-# Importing all the required libraries
-import serial
-import time
-import cv2
-import numpy as np
-from cv2 import aruco
-from picamera2 import Picamera2
-
-
-# Load the ArUco dictionary and parameters
-aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_6X6_50)
-parameters = aruco.DetectorParameters()
-parameters.adaptiveThreshWinSizeMax = 100
-
-# Start the serial communication between raspberry pi and arduino
-ser = serial.Serial('/dev/ttyACM0', 9600)
-time.sleep(2)
-
-# Define parameters for raspberry pi camera
-picam2 = Picamera2()
-picam2.resolution = (1280, 720)
-picam2.framerate = 10
-picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (1280, 720)}))
-picam2.start() # Start raspberry pi camera
-
-# Function for detecting triangles for direction
-def detect_triangles(img):
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-    # Define lower and upper bounds of blue color in HSV
-    lower_blue = np.array([90, 50, 50])
-    upper_blue = np.array([130, 255, 255])
-
-    # Create a mask of blue pixels
-    mask = cv2.inRange(hsv, lower_blue, upper_blue)
-
-    # Perform morphological operations
-    kernel = np.ones((5, 5), np.uint8)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = [c for c in contours if cv2.contourArea(c) > 100]
